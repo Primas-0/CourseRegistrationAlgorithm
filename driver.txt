@@ -1,0 +1,19 @@
+Dump of the leftist heap queue with priorityFn2 (MINHEAP):
+(((5:rryva:0)4:gegcd:1(4:inxvf:0))0:fafst:2((7:uhamq:0)1:ltvmp:1((8:sxosd:0)7:paswh:0)))
+
+Dump of the skew heap queue with priorityFn2 (MINHEAP):
+((((8:sxosd)4:inxvf)1:ltvmp(7:paswh))0:fafst((7:uhamq)4:gegcd(5:rryva)))
+
+Preorder traversal of the nodes in the queue with priorityFn2 (MINHEAP):
+Contents of the queue:
+[0] Student name: fafst, Major: Bioinformatics, Gender: Not specified, Level: Freshman
+[1] Student name: ltvmp, Major: Chemical Engineering, Gender: Not specified, Level: Sophomore
+[4] Student name: inxvf, Major: Mechanical Engineering, Gender: Female, Level: Sophomore
+[8] Student name: sxosd, Major: Computer Science, Gender: Male, Level: Senior
+[7] Student name: paswh, Major: Electrical Engineering, Gender: Male, Level: Junior
+[4] Student name: gegcd, Major: Mechanical Engineering, Gender: Female, Level: Sophomore
+[7] Student name: uhamq, Major: Electrical Engineering, Gender: Male, Level: Senior
+[5] Student name: rryva, Major: Electrical Engineering, Gender: Female, Level: Junior
+
+Dump of the skew queue with priorityFn1 (MAXHEAP):
+(((7:paswh)9:uhamq(((((0:fafst)3:ltvmp)4:gegcd)4:inxvf)7:rryva))10:sxosd)
