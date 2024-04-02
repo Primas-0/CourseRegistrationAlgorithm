@@ -178,6 +178,6 @@ private:
     /******************************************
      * Private function declarations go here! *
      ******************************************/
-
+    void destroyHeap(Node* node);
 };
 #endif
