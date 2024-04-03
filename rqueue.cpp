@@ -1,5 +1,6 @@
 // UMBC - CMSC 341 - Spring 2024 - Proj3
 #include "rqueue.h"
+
 RQueue::RQueue(prifn_t priFn, HEAPTYPE heapType, STRUCTURE structure) {
     m_heap = nullptr;
     m_size = 0;
@@ -8,7 +9,7 @@ RQueue::RQueue(prifn_t priFn, HEAPTYPE heapType, STRUCTURE structure) {
     m_structure = structure;
 }
 
-void RQueue::destroyHeap(Node* node) {
+void RQueue::destroyHeap(Node *node) {
     //if node is not nullptr
     if (node) {
         //recursively deallocate memory for left and right sub-heaps
@@ -31,22 +32,56 @@ void RQueue::clear() {
     m_size = 0;
 }
 
-RQueue::RQueue(const RQueue& rhs) {
-    //TODO: The copy constructor must make a deep copy of the rhs object. It must function correctly if rhs is empty.
-    // This function creates an exact same copy of rhs.
+void RQueue::copyNodes(Node *sourceNode, Node *&destinationNode) {
+    if (sourceNode == nullptr) {
+        destinationNode = nullptr;
+    } else {
+        //allocate memory and copy over the data from each node
+        destinationNode = new Node(*sourceNode);
 
+        //preorder traversal of heap
+        copyNodes(sourceNode->m_left, destinationNode->m_left);
+        copyNodes(sourceNode->m_right, destinationNode->m_right);
+    }
+}
+
+RQueue::RQueue(const RQueue &rhs) {
+    //mirror member variables
+    m_size = rhs.m_size;
+    m_priorFunc = rhs.m_priorFunc;
+    m_heapType = rhs.m_heapType;
+    m_structure = rhs.m_structure;
+
+    //make current object a deep copy of rhs
+    copyNodes(rhs.m_heap, m_heap);
 }
 
 HEAPTYPE RQueue::getHeapType() const {
     return m_heapType;
 }
 
-RQueue& RQueue::operator=(const RQueue& rhs) {
-    //TODO: The assignment operator creates an exact same copy of rhs. You should not call the copy constructor in the
-    // implementation of the assignment operator.
+RQueue &RQueue::operator=(const RQueue &rhs) {
+    //if self-assignment, return current object without any changes
+    if (this == &rhs) {
+        return *this;
+    }
+
+    //otherwise, destroy current object
+    clear();
+
+    //mirror member variables
+    m_size = rhs.m_size;
+    m_priorFunc = rhs.m_priorFunc;
+    m_heapType = rhs.m_heapType;
+    m_structure = rhs.m_structure;
+
+    //make current object a deep copy of rhs
+    copyNodes(rhs.m_heap, m_heap);
+
+    return *this;
 }
 
-void RQueue::mergeWithQueue(RQueue& rhs) {
+void RQueue::mergeWithQueue(RQueue &rhs) {
     //TODO: This function merges the host queue with the rhs; it leaves rhs empty; it transfers all nodes from rhs to
     // the current heap. Two heaps can only be merged if they have the same priority function and they are of the same
     // data structure. If the user attempts to merge queues with different priority functions, or two different data
@@ -55,7 +90,7 @@ void RQueue::mergeWithQueue(RQueue& rhs) {
 
 }
 
-void RQueue::insertStudent(const Student& student) {
+void RQueue::insertStudent(const Student &student) {
     //TODO: Inserts a student into the queue. Must maintain the min-heap or the max-heap property depending on the
     // settings. Moreover, if the selected data structure is leftist heap, it needs to maintain a correct value of Null
     // Path Length (NPL) in the node.
@@ -83,7 +118,7 @@ void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
 
 }
 
-void RQueue::setStructure(STRUCTURE structure){
+void RQueue::setStructure(STRUCTURE structure) {
     //TODO: This function sets the data structure, i.e. it is either SKEW or LEFTIST. It must rebuild a heap with the
     // new structure using the nodes in the current data structure. Note: rebuild means transferring nodes not
     // recreating nodes.
@@ -103,14 +138,15 @@ void RQueue::printStudentsQueue() const {
 
 void RQueue::dump() const {
     if (m_size == 0) {
-        cout << "Empty heap.\n" ;
+        cout << "Empty heap.\n";
     } else {
         dump(m_heap);
     }
     cout << endl;
 }
+
 void RQueue::dump(Node *pos) const {
-    if ( pos != nullptr ) {
+    if (pos != nullptr) {
         cout << "(";
         dump(pos->m_left);
         if (m_structure == SKEW)
@@ -122,14 +158,15 @@ void RQueue::dump(Node *pos) const {
     }
 }
 
-ostream& operator<<(ostream& sout, const Student& student) {
+ostream &operator<<(ostream &sout, const Student &student) {
     sout << "Student name: " << student.m_name
          << ", Major: " << student.getMajorStr()
          << ", Gender: " << student.getGenderStr()
          << ", Level: " << student.getLevelStr();
     return sout;
 }
-ostream& operator<<(ostream& sout, const Node& node) {
+
+ostream &operator<<(ostream &sout, const Node &node) {
     sout << node.m_student;
     return sout;
 }
