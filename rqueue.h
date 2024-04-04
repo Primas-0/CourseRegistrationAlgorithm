@@ -179,6 +179,14 @@ private:
      * Private function declarations go here! *
      ******************************************/
     void destroyHeap(Node* node);
+
     void copyNodes(Node* sourceNode, Node*& destinationNode);
+
+    Node* mergeLEFTIST(Node* lhs, Node* rhs);
+    Node* mergeSKEW(Node* lhs, Node* rhs);
+    bool priorityCheckForSKEW(int lhsPriority, int rhsPriority);
+
+    void insertMINHEAP(const Student& student, Node*& curr);
+    void insertMAXHEAP(const Student& student, Node*& curr);
 };
 #endif

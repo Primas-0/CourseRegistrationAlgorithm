@@ -9,16 +9,6 @@ RQueue::RQueue(prifn_t priFn, HEAPTYPE heapType, STRUCTURE structure) {
     m_structure = structure;
 }
 
-void RQueue::destroyHeap(Node *node) {
-    //if node is not nullptr
-    if (node) {
-        //recursively deallocate memory for left and right sub-heaps
-        destroyHeap(node->m_left);
-        destroyHeap(node->m_right);
-        delete node;
-    }
-}
-
 RQueue::~RQueue() {
     clear();
 }
@@ -32,16 +22,13 @@ void RQueue::clear() {
     m_size = 0;
 }
 
-void RQueue::copyNodes(Node *sourceNode, Node *&destinationNode) {
-    if (sourceNode == nullptr) {
-        destinationNode = nullptr;
-    } else {
-        //allocate memory and copy over the data from each node
-        destinationNode = new Node(*sourceNode);
-
-        //preorder traversal of heap
-        copyNodes(sourceNode->m_left, destinationNode->m_left);
-        copyNodes(sourceNode->m_right, destinationNode->m_right);
+void RQueue::destroyHeap(Node *node) {
+    //if node is not nullptr
+    if (node) {
+        //recursively deallocate memory for left and right sub-heaps
+        destroyHeap(node->m_left);
+        destroyHeap(node->m_right);
+        delete node;
     }
 }
 
@@ -54,6 +41,19 @@ RQueue::RQueue(const RQueue &rhs) {
 
     //make current object a deep copy of rhs
     copyNodes(rhs.m_heap, m_heap);
+}
+
+void RQueue::copyNodes(Node *sourceNode, Node *&destinationNode) {
+    if (sourceNode == nullptr) {
+        destinationNode = nullptr;
+    } else {
+        //allocate memory and copy over the data from each node
+        destinationNode = new Node(sourceNode->m_student);
+
+        //preorder traversal of heap
+        copyNodes(sourceNode->m_left, destinationNode->m_left);
+        copyNodes(sourceNode->m_right, destinationNode->m_right);
+    }
 }
 
 HEAPTYPE RQueue::getHeapType() const {
@@ -87,14 +87,62 @@ void RQueue::mergeWithQueue(RQueue &rhs) {
     // data structure. If the user attempts to merge queues with different priority functions, or two different data
     // structures a domain_error exception should be thrown. This function requires protection against self-merging.
     // Merging a heap with itself is not allowed.
+    if (m_structure == LEFTIST) {
+        m_heap = mergeLEFTIST(m_heap, rhs.m_heap);
+    } else {
+        m_heap = mergeSKEW(m_heap, rhs.m_heap);
+    }
+}
+
+Node* RQueue::mergeLEFTIST(Node *lhs, Node *rhs) {
 
 }
 
-void RQueue::insertStudent(const Student &student) {
-    //TODO: Inserts a student into the queue. Must maintain the min-heap or the max-heap property depending on the
-    // settings. Moreover, if the selected data structure is leftist heap, it needs to maintain a correct value of Null
-    // Path Length (NPL) in the node.
+Node* RQueue::mergeSKEW(Node *lhs, Node *rhs) {
+    if (lhs == nullptr) {
+        return rhs;
+    } else if (rhs == nullptr) {
+        return lhs;
+    } else if (priorityCheckForSKEW(m_priorFunc(lhs->m_student), m_priorFunc(rhs->m_student))) {
+        Node *temp = lhs->m_right;
+        lhs->m_right = lhs->m_left;
+        lhs->m_left = mergeSKEW(rhs, temp);
+        return lhs;
+    } else {
+        return mergeSKEW(rhs, lhs);
+    }
+}
 
+bool RQueue::priorityCheckForSKEW(int lhsPriority, int rhsPriority) {
+    if ((m_heapType == MINHEAP && lhsPriority <= rhsPriority) || (m_heapType == MAXHEAP && lhsPriority >= rhsPriority)) {
+        return true;
+    }
+    return false;
+}
+
+void RQueue::insertStudent(const Student &student) {
+    if (m_heapType == MINHEAP) {
+        insertMINHEAP(student, m_heap);
+    } else if (m_heapType == MAXHEAP) {
+        insertMAXHEAP(student, m_heap);
+    }
+
+    if (m_structure == LEFTIST) {
+        //TODO: If the selected data structure is leftist heap, it needs to maintain a correct value of Null Path Length
+        // (NPL) in the node.
+    }
+}
+
+void RQueue::insertMINHEAP(const Student &student, Node *&curr) {
+    //TODO: Inserts a student into the queue. Must maintain the min-heap property.
+
+    //call merge
+}
+
+void RQueue::insertMAXHEAP(const Student &student, Node *&curr) {
+    //TODO: Inserts a student into the queue. Must maintain the max-heap property.
+
+    //call merge
 }
 
 int RQueue::numStudents() const {
