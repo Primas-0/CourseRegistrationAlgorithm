@@ -82,39 +82,53 @@ RQueue &RQueue::operator=(const RQueue &rhs) {
 }
 
 void RQueue::mergeWithQueue(RQueue &rhs) {
-    //TODO: This function merges the host queue with the rhs; it leaves rhs empty; it transfers all nodes from rhs to
-    // the current heap. Two heaps can only be merged if they have the same priority function and they are of the same
-    // data structure. If the user attempts to merge queues with different priority functions, or two different data
-    // structures a domain_error exception should be thrown. This function requires protection against self-merging.
-    // Merging a heap with itself is not allowed.
-    if (m_structure == LEFTIST) {
-        m_heap = mergeLEFTIST(m_heap, rhs.m_heap);
-    } else {
-        m_heap = mergeSKEW(m_heap, rhs.m_heap);
+    //protection against self-merging
+    if (this == &rhs) {
+        return;
     }
+
+    //merge host queue with rhs if conditions are met
+    if (m_structure == LEFTIST && rhs.m_structure == LEFTIST && m_priorFunc == rhs.m_priorFunc) {
+        m_heap = mergeLEFTIST(m_heap, rhs.m_heap);
+    } else if (m_structure == SKEW && rhs.m_structure == SKEW && m_priorFunc == rhs.m_priorFunc) {
+        m_heap = mergeSKEW(m_heap, rhs.m_heap);
+    } else {
+        throw domain_error("Cannot merge queues with different priority functions or different data structures");
+    }
+
+    //leave rhs empty
+    rhs.m_heap = nullptr;
+    rhs.m_size = 0;
 }
 
-Node* RQueue::mergeLEFTIST(Node *lhs, Node *rhs) {
+Node *RQueue::mergeLEFTIST(Node *lhs, Node *rhs) {
 
 }
 
-Node* RQueue::mergeSKEW(Node *lhs, Node *rhs) {
+Node *RQueue::mergeSKEW(Node *lhs, Node *rhs) {
+    //base cases
     if (lhs == nullptr) {
         return rhs;
     } else if (rhs == nullptr) {
         return lhs;
-    } else if (priorityCheckForSKEW(m_priorFunc(lhs->m_student), m_priorFunc(rhs->m_student))) {
+
+    } else if (priorityCheck(lhs, rhs)) {
+        //if lhs has higher priority, swap its children and merge rhs with lhs->m_left
         Node *temp = lhs->m_right;
         lhs->m_right = lhs->m_left;
         lhs->m_left = mergeSKEW(rhs, temp);
+
+        //once all merges are complete, return
         return lhs;
     } else {
+        //if rhs has higher priority, swap lhs and rhs and call merge recursively
         return mergeSKEW(rhs, lhs);
     }
 }
 
-bool RQueue::priorityCheckForSKEW(int lhsPriority, int rhsPriority) {
-    if ((m_heapType == MINHEAP && lhsPriority <= rhsPriority) || (m_heapType == MAXHEAP && lhsPriority >= rhsPriority)) {
+bool RQueue::priorityCheck(Node *lhs, Node *rhs) {
+    if ((m_heapType == MINHEAP && m_priorFunc(lhs->m_student) <= m_priorFunc(rhs->m_student)) ||
+        (m_heapType == MAXHEAP && m_priorFunc(lhs->m_student) >= m_priorFunc(rhs->m_student))) {
         return true;
     }
     return false;
