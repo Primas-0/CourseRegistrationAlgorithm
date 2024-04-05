@@ -102,18 +102,47 @@ void RQueue::mergeWithQueue(RQueue &rhs) {
 }
 
 Node *RQueue::mergeLEFTIST(Node *lhs, Node *rhs) {
+    if (lhs == nullptr) {
+        //base case 1
+        return rhs;
+    } else if (rhs == nullptr) {
+        //base case 2
+        return lhs;
+    } else if (priorityCheck(lhs, rhs)) {
+        //if lhs has higher priority
+        lhs->m_right = mergeLEFTIST(lhs->m_right, rhs);
 
+        if (lhs->m_left == nullptr) {
+            //if left side is empty, move right child to left side
+            lhs->m_left = lhs->m_right;
+            lhs->m_right = nullptr;
+        } else {
+            //if the NPL value of right child is larger than that of left child, swap them
+            if (lhs->m_right->m_npl > lhs->m_left->m_npl) {
+                Node *temp = lhs->m_left;
+                lhs->m_left = lhs->m_right;
+                lhs->m_right = temp;
+            }
+            //update NPL values
+            lhs->m_npl = lhs->m_right->m_npl + 1;
+        }
+        return lhs;
+    } else {
+        //if rhs has higher priority, swap lhs and rhs and call merge recursively
+        return mergeLEFTIST(rhs, lhs);
+    }
 }
 
 Node *RQueue::mergeSKEW(Node *lhs, Node *rhs) {
-    //base cases
     if (lhs == nullptr) {
+        //base case 1
         return rhs;
     } else if (rhs == nullptr) {
+        //base case 2
         return lhs;
-
     } else if (priorityCheck(lhs, rhs)) {
-        //if lhs has higher priority, swap its children and merge rhs with lhs->m_left
+        //if lhs has higher priority, swap its children, then recursively merge rhs and the left sub-heap of lhs
+        //replace the left subtree of lhs with the result of the recursive merge
         Node *temp = lhs->m_right;
         lhs->m_right = lhs->m_left;
         lhs->m_left = mergeSKEW(rhs, temp);
@@ -127,6 +156,7 @@ Node *RQueue::mergeSKEW(Node *lhs, Node *rhs) {
 }
 
 bool RQueue::priorityCheck(Node *lhs, Node *rhs) {
+    //compares the priority of two nodes based on heap type
     if ((m_heapType == MINHEAP && m_priorFunc(lhs->m_student) <= m_priorFunc(rhs->m_student)) ||
         (m_heapType == MAXHEAP && m_priorFunc(lhs->m_student) >= m_priorFunc(rhs->m_student))) {
         return true;
