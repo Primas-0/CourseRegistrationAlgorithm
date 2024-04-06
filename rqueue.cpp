@@ -165,28 +165,14 @@ bool RQueue::priorityCheck(Node *lhs, Node *rhs) {
 }
 
 void RQueue::insertStudent(const Student &student) {
-    if (m_heapType == MINHEAP) {
-        insertMINHEAP(student, m_heap);
-    } else if (m_heapType == MAXHEAP) {
-        insertMAXHEAP(student, m_heap);
-    }
+    //make a temporary heap with the same properties as the current one (to ensure merge can occur)
+    RQueue tempQueue(m_priorFunc, m_heapType, m_structure);
 
-    if (m_structure == LEFTIST) {
-        //TODO: If the selected data structure is leftist heap, it needs to maintain a correct value of Null Path Length
-        // (NPL) in the node.
-    }
-}
+    //allocate memory for new node using passed-in student object, make it the root of temporary heap
+    tempQueue.m_heap = new Node(student);
 
-void RQueue::insertMINHEAP(const Student &student, Node *&curr) {
-    //TODO: Inserts a student into the queue. Must maintain the min-heap property.
-
-    //call merge
-}
-
-void RQueue::insertMAXHEAP(const Student &student, Node *&curr) {
-    //TODO: Inserts a student into the queue. Must maintain the max-heap property.
-
-    //call merge
+    //merge the two heaps, essentially inserting node into current heap
+    mergeWithQueue(tempQueue);
 }
 
 int RQueue::numStudents() const {

@@ -185,8 +185,5 @@ private:
     Node* mergeLEFTIST(Node* lhs, Node* rhs);
     Node* mergeSKEW(Node* lhs, Node* rhs);
     bool priorityCheck(Node *lhs, Node *rhs);
-
-    void insertMINHEAP(const Student& student, Node*& curr);
-    void insertMAXHEAP(const Student& student, Node*& curr);
 };
 #endif
