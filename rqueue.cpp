@@ -218,12 +218,12 @@ Student RQueue::getNextStudent() {
     return highestPriorityStudent;
 }
 
-Node* RQueue::replaceRoot(Node* oldRoot) {
+Node *RQueue::replaceRoot(Node *oldRoot) {
     //TODO
-
+    return nullptr;
 }
 
-void RQueue::heapify(Node* root) {
+void RQueue::heapify(Node *root) {
     //TODO
 
 }
@@ -235,6 +235,7 @@ void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
     m_priorFunc = priFn;
     m_heapType = heapType;
 
+    m_heap = rebuildHeap(m_heap);
 }
 
 void RQueue::setStructure(STRUCTURE structure) {
@@ -244,6 +245,12 @@ void RQueue::setStructure(STRUCTURE structure) {
 
     m_structure = structure;
 
+    m_heap = rebuildHeap(m_heap);
+}
+
+Node *RQueue::rebuildHeap(Node *root) {
+    //TODO
+    return nullptr;
 }
 
 STRUCTURE RQueue::getStructure() const {
@@ -251,10 +258,21 @@ STRUCTURE RQueue::getStructure() const {
 }
 
 void RQueue::printStudentsQueue() const {
-    //TODO: It prints the contents of the queue using preorder traversal. Although the first student printed should have
-    // the highest priority, the remaining students will not necessarily be in priority order. Please refer to the
-    // sample output file (driver.txt) for the format of this function's output.
+    cout << "Contents of the queue: \n";
 
+    //print the contents of the queue using preorder traversal
+    preorderPrint(m_heap);
+}
+
+void RQueue::preorderPrint(Node *node) const {
+    if (node != nullptr) {
+        //visit all nodes and print each student's details
+        cout << "[" << m_priorFunc(node->m_student) << "] Student name: " << node->m_student.m_name << ", Major: "
+             << node->m_student.getMajorStr() << ", Gender: " << node->m_student.getGenderStr() << ", Level: "
+             << node->m_student.getLevelStr() << "\n";
+        preorderPrint(node->m_left);
+        preorderPrint(node->m_right);
+    }
 }
 
 void RQueue::dump() const {
