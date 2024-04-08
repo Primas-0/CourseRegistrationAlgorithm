@@ -173,6 +173,8 @@ void RQueue::insertStudent(const Student &student) {
 
     //merge the two heaps, essentially inserting node into current heap
     mergeWithQueue(tempQueue);
+
+    m_size++;
 }
 
 int RQueue::numStudents() const {
@@ -188,11 +190,50 @@ Student RQueue::getNextStudent() {
     // maintain the min-heap or max-heap property. The function throws an out_of_range exception if the queue is empty
     // when the function is called.
 
+    //throw error if queue is empty
+    if (m_size == 0) {
+        throw out_of_range("Queue is empty");
+    }
+
+    //get the highest priority student from root node
+    Student highestPriorityStudent = m_heap->m_student;
+
+    //remove the root node from the heap
+    Node *oldRoot = m_heap;
+    if (m_size == 1) {
+        //if there was only one node in the heap, empty the heap
+        m_heap = nullptr;
+    } else {
+        //otherwise, replace the root node with the last node in the heap
+        m_heap = replaceRoot(oldRoot);
+    }
+    delete oldRoot;
+    m_size--;
+
+    //maintain min-heap or max-heap property
+    if (m_size > 1) {
+        heapify(m_heap);
+    }
+
+    return highestPriorityStudent;
+}
+
+Node* RQueue::replaceRoot(Node* oldRoot) {
+    //TODO
+
+}
+
+void RQueue::heapify(Node* root) {
+    //TODO
+
 }
 
 void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
     //TODO: This function sets a new priority function and its corresponding heap type (min-heap or max-heap). It must
     // rebuild the heap! Note: it is the responsibility of the caller to pass compatible arguments priFn and heapType.
+
+    m_priorFunc = priFn;
+    m_heapType = heapType;
 
 }
 
@@ -200,6 +241,8 @@ void RQueue::setStructure(STRUCTURE structure) {
     //TODO: This function sets the data structure, i.e. it is either SKEW or LEFTIST. It must rebuild a heap with the
     // new structure using the nodes in the current data structure. Note: rebuild means transferring nodes not
     // recreating nodes.
+
+    m_structure = structure;
 
 }
 

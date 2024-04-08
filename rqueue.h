@@ -185,5 +185,8 @@ private:
     Node* mergeLEFTIST(Node* lhs, Node* rhs);
     Node* mergeSKEW(Node* lhs, Node* rhs);
     bool priorityCheck(Node *lhs, Node *rhs);
+
+    Node* replaceRoot(Node* oldRoot);
+    void heapify(Node* root);
 };
 #endif
