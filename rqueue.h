@@ -186,10 +186,9 @@ private:
     Node* mergeSKEW(Node* lhs, Node* rhs);
     bool priorityCheck(Node* lhs, Node* rhs);
 
-    Node* replaceRoot(Node* oldRoot);
-    void heapify(Node* root);
-
     Node* rebuildHeap(Node* root);
+    Node* removePointer();
+    void insertPointer();
 
     void preorderPrint(Node* node) const;
 };

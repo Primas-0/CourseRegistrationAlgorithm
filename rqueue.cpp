@@ -186,10 +186,6 @@ prifn_t RQueue::getPriorityFn() const {
 }
 
 Student RQueue::getNextStudent() {
-    //TODO: This function extracts (removes the node) and returns the highest priority student from the queue. It must
-    // maintain the min-heap or max-heap property. The function throws an out_of_range exception if the queue is empty
-    // when the function is called.
-
     //throw error if queue is empty
     if (m_size == 0) {
         throw out_of_range("Queue is empty");
@@ -198,59 +194,56 @@ Student RQueue::getNextStudent() {
     //get the highest priority student from root node
     Student highestPriorityStudent = m_heap->m_student;
 
+    //save the left and right sub-heaps
+    Node *lhs = m_heap->m_left;
+    Node *rhs = m_heap->m_right;
+
     //remove the root node from the heap
-    Node *oldRoot = m_heap;
+    delete m_heap;
+
     if (m_size == 1) {
-        //if there was only one node in the heap, empty the heap
+        //if there's only one node in the heap, empty the heap
         m_heap = nullptr;
     } else {
-        //otherwise, replace the root node with the last node in the heap
-        m_heap = replaceRoot(oldRoot);
+        //otherwise, maintain min-heap or max-heap property by merging the two sub-heaps
+        if (m_structure == LEFTIST) {
+            m_heap = mergeLEFTIST(lhs, rhs);
+        } else {
+            m_heap = mergeSKEW(lhs, rhs);
+        }
     }
-    delete oldRoot;
-    m_size--;
 
-    //maintain min-heap or max-heap property
-    if (m_size > 1) {
-        heapify(m_heap);
-    }
+    //update size of heap
+    m_size--;
 
     return highestPriorityStudent;
 }
 
-Node *RQueue::replaceRoot(Node *oldRoot) {
-    //TODO
-    return nullptr;
-}
-
-void RQueue::heapify(Node *root) {
-    //TODO
-
-}
-
 void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
-    //TODO: This function sets a new priority function and its corresponding heap type (min-heap or max-heap). It must
-    // rebuild the heap! Note: it is the responsibility of the caller to pass compatible arguments priFn and heapType.
-
     m_priorFunc = priFn;
     m_heapType = heapType;
-
     m_heap = rebuildHeap(m_heap);
 }
 
 void RQueue::setStructure(STRUCTURE structure) {
-    //TODO: This function sets the data structure, i.e. it is either SKEW or LEFTIST. It must rebuild a heap with the
-    // new structure using the nodes in the current data structure. Note: rebuild means transferring nodes not
-    // recreating nodes.
-
     m_structure = structure;
-
     m_heap = rebuildHeap(m_heap);
 }
 
 Node *RQueue::rebuildHeap(Node *root) {
-    //TODO
+    //TODO:
+    // Note: rebuild means transferring nodes not recreating nodes.
+    // get and remove root pointer (which will merge automatically)
+    // insert root pointer into new pointer heap (merge automatically)
     return nullptr;
+}
+
+Node *RQueue::removePointer() {
+
+}
+
+void RQueue::insertPointer() {
+
 }
 
 STRUCTURE RQueue::getStructure() const {
