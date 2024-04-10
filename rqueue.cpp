@@ -222,28 +222,41 @@ Student RQueue::getNextStudent() {
 void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
     m_priorFunc = priFn;
     m_heapType = heapType;
-    m_heap = rebuildHeap(m_heap);
+
+    Node* oldNode = m_heap;
+    m_heap = nullptr;
+    rebuildHeap(oldNode);
 }
 
 void RQueue::setStructure(STRUCTURE structure) {
     m_structure = structure;
-    m_heap = rebuildHeap(m_heap);
+
+    Node* oldNode = m_heap;
+    m_heap = nullptr;
+    rebuildHeap(oldNode);
 }
 
-Node *RQueue::rebuildHeap(Node *root) {
-    //TODO:
-    // Note: rebuild means transferring nodes not recreating nodes.
-    // get and remove root pointer (which will merge automatically)
-    // insert root pointer into new pointer heap (merge automatically)
-    return nullptr;
+void RQueue::rebuildHeap(Node* oldNode) {
+    if (oldNode != nullptr) {
+        //postorder traversal
+        rebuildHeap(oldNode->m_left);
+        rebuildHeap(oldNode->m_right);
+
+        //remove inserted nodes from old heap
+        oldNode->m_left = nullptr;
+        oldNode->m_right = nullptr;
+
+        //insert each node into new "heap"
+        insertPointer(oldNode, m_heap);
+    }
 }
 
-Node *RQueue::removePointer() {
-
-}
-
-void RQueue::insertPointer() {
-
+void RQueue::insertPointer(Node* oldNode, Node* newNode) {
+    if (m_structure == LEFTIST) {
+        m_heap = mergeLEFTIST(oldNode, newNode);
+    } else {
+        m_heap = mergeSKEW(oldNode, newNode);
+    }
 }
 
 STRUCTURE RQueue::getStructure() const {
