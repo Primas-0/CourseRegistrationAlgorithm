@@ -88,9 +88,11 @@ void RQueue::mergeWithQueue(RQueue &rhs) {
     }
 
     //merge host queue with rhs if conditions are met
-    if (m_structure == LEFTIST && rhs.m_structure == LEFTIST && m_priorFunc == rhs.m_priorFunc) {
+    if (m_structure == LEFTIST && rhs.m_structure == LEFTIST && m_priorFunc == rhs.m_priorFunc &&
+        m_heapType == rhs.m_heapType) {
         m_heap = mergeLEFTIST(m_heap, rhs.m_heap);
-    } else if (m_structure == SKEW && rhs.m_structure == SKEW && m_priorFunc == rhs.m_priorFunc) {
+    } else if (m_structure == SKEW && rhs.m_structure == SKEW && m_priorFunc == rhs.m_priorFunc &&
+               m_heapType == rhs.m_heapType) {
         m_heap = mergeSKEW(m_heap, rhs.m_heap);
     } else {
         throw domain_error("Cannot merge queues with different priority functions or different data structures");
@@ -223,7 +225,7 @@ void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
     m_priorFunc = priFn;
     m_heapType = heapType;
 
-    Node* oldNode = m_heap;
+    Node *oldNode = m_heap;
     m_heap = nullptr;
     rebuildHeap(oldNode);
 }
@@ -231,12 +233,12 @@ void RQueue::setPriorityFn(prifn_t priFn, HEAPTYPE heapType) {
 void RQueue::setStructure(STRUCTURE structure) {
     m_structure = structure;
 
-    Node* oldNode = m_heap;
+    Node *oldNode = m_heap;
     m_heap = nullptr;
     rebuildHeap(oldNode);
 }
 
-void RQueue::rebuildHeap(Node* oldNode) {
+void RQueue::rebuildHeap(Node *oldNode) {
     if (oldNode != nullptr) {
         //postorder traversal
         rebuildHeap(oldNode->m_left);
@@ -251,7 +253,7 @@ void RQueue::rebuildHeap(Node* oldNode) {
     }
 }
 
-void RQueue::insertPointer(Node* oldNode, Node* newNode) {
+void RQueue::insertPointer(Node *oldNode, Node *newNode) {
     if (m_structure == LEFTIST) {
         m_heap = mergeLEFTIST(oldNode, newNode);
     } else {
