@@ -124,10 +124,97 @@ int priorityFn2(const Student &student);
 
 class Tester {
 public:
+    //Test insertion for a normal case of min-heap. After a decent number of insertion (e.g. 300 nodes) we traverse the tree and check that the heap property is satisfied at every node.
+    bool testHeapPropertyAfterInsertMINHEAP();
 
+    //Test insertion for a normal case of max-heap. After a decent number of insertion (e.g. 300 nodes) we traverse the tree and check that the heap property is satisfied at every node.
+
+
+    //Test removal for a normal case of min-heap. After a decent number of insertion (e.g. 300 nodes) we check whether all removals happen in the correct order.
+
+
+    //Test removal for a normal case of max-heap. After a decent number of insertion (e.g. 300 nodes) we check whether all removals happen in the correct order.
+
+
+    //Test all nodes in a leftist heap have the correct NPL value.
+
+
+    //Test a leftist heap preserves the property of such a heap, i.e. at every node the NPL value of the left child is greater than or equal to the NPL value of the right child.
+
+
+    //Test whether after changing the priority function a correct heap is rebuilt with the same data (nodes) and the different priority function.
+
+
+    //Test merge of an empty queue (an edge case) with a normal queue. This is a call to the function RQueue::mergeWithQueue(RQueue& rhs) where rhs is a normally populated queue.
+
+
+    //Test the RQueue class copy constructor for a normal case.
+
+
+    //Test the RQueue class copy constructor for an edge case.
+
+
+    //Test the RQueue class assignment operator for a normal case.
+
+
+    //Test the RQueue class assignment operator for an edge case.
+
+
+    //Test that attempting to dequeue an empty queue throws an out_of_range exception.
+
+
+    //Test that attempting to merge queues with different priority functions throws a domain_error exception.
+
+
+private:
+    void insertMultipleStudents(RQueue &myQueue);
+    bool checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType);
 };
 
+void insertMultipleStudents(RQueue &myQueue) {
+    Random randNameObject(97, 122);
+    Random randLevelObject(0, 3);
+    Random randMajorObject(0, 4);
+    Random randGroupObject(0, 3);
+    Random randRaceObject(0, 2);
+    Random randGenderObject(0, 2);
+    Random randIncomeObject(0, 4);
+    Random randHighSchoolObject(0, 2);
+
+    int studentSize = 300;
+
+    for (int i = 0; i < studentSize; i++) {
+        Student student(randNameObject.getRandString(5), randLevelObject.getRandNum(),
+                        randMajorObject.getRandNum(), randGroupObject.getRandNum(),
+                        randRaceObject.getRandNum(), randGenderObject.getRandNum(),
+                        randIncomeObject.getRandNum(), randHighSchoolObject.getRandNum());
+        myQueue.insertStudent(student);
+    }
+}
+
+bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType) {
+    //TODO: helper function to check whether the heap property is satisfied after the operations
+
+    return false;
+}
+
+bool Tester::testHeapPropertyAfterInsertMINHEAP() {
+    RQueue myQueue(priorityFn2, MINHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    return checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP);
+}
+
 int main() {
+    Tester tester;
+
+    cout << "\nTesting insertStudent - check whether heap property is satisfied after insertion into min-heap:" << endl;
+    if (tester.testHeapPropertyAfterInsertMINHEAP()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
     return 0;
 }
 
