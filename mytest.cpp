@@ -120,6 +120,7 @@ private:
 };
 
 int priorityFn1(const Student &student);
+
 int priorityFn2(const Student &student);
 
 class Tester {
@@ -168,10 +169,11 @@ public:
 
 private:
     void insertMultipleStudents(RQueue &myQueue);
+
     bool checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType);
 };
 
-void insertMultipleStudents(RQueue &myQueue) {
+void Tester::insertMultipleStudents(RQueue &myQueue) {
     Random randNameObject(97, 122);
     Random randLevelObject(0, 3);
     Random randMajorObject(0, 4);
@@ -193,9 +195,51 @@ void insertMultipleStudents(RQueue &myQueue) {
 }
 
 bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType) {
-    //TODO: helper function to check whether the heap property is satisfied after the operations
+    if (node != nullptr) {
+        //recurse until both left and right sub-heaps satisfy heap property
+        if (!checkHeapProperty(node->m_left, priorFunc, heapType) ||
+            !checkHeapProperty(node->m_right, priorFunc, heapType)) {
+            return false;
+        }
 
-    return false;
+        int currPriority = priorFunc(node->m_student);
+        int leftChildPriority = 0;
+        int rightChildPriority = 0;
+
+        if (node->m_left != nullptr) {
+            //if there is a left child, get its priority
+            leftChildPriority = priorFunc(node->m_left->m_student);
+        } else {
+            //otherwise, assign a default priority
+            if (heapType == MINHEAP) {
+                leftChildPriority = MAX;
+            } else {
+                leftChildPriority = MIN;
+            }
+        }
+
+        if (node->m_right != nullptr) {
+            //if there is a right child, get its priority
+            rightChildPriority = priorFunc(node->m_right->m_student);
+        } else {
+            //otherwise, assign a default priority
+            if (heapType == MINHEAP) {
+                rightChildPriority = MAX;
+            } else {
+                rightChildPriority = MIN;
+            }
+        }
+
+        //compare priority values to ensure heap property
+        if ((heapType == MINHEAP && currPriority <= leftChildPriority && currPriority <= rightChildPriority) ||
+            (heapType == MAXHEAP && currPriority >= leftChildPriority && currPriority >= rightChildPriority)) {
+            return true;
+        }
+        //if comparison fails
+        return false;
+    }
+    //if heap is empty
+    return true;
 }
 
 bool Tester::testHeapPropertyAfterInsertMINHEAP() {
