@@ -120,28 +120,18 @@ private:
 };
 
 int priorityFn1(const Student &student);
-
 int priorityFn2(const Student &student);
 
 class Tester {
 public:
-    //Test insertion for a normal case of min-heap. After a decent number of insertion (e.g. 300 nodes) we traverse the tree and check that the heap property is satisfied at every node.
     bool testHeapPropertyAfterInsertMINHEAP();
+    bool testHeapPropertyAfterInsertMAXHEAP();
 
-    //Test insertion for a normal case of max-heap. After a decent number of insertion (e.g. 300 nodes) we traverse the tree and check that the heap property is satisfied at every node.
+    bool testRemovalOrderMINHEAP();
+    bool testRemovalOrderMAXHEAP();
 
-
-    //Test removal for a normal case of min-heap. After a decent number of insertion (e.g. 300 nodes) we check whether all removals happen in the correct order.
-
-
-    //Test removal for a normal case of max-heap. After a decent number of insertion (e.g. 300 nodes) we check whether all removals happen in the correct order.
-
-
-    //Test all nodes in a leftist heap have the correct NPL value.
-
-
-    //Test a leftist heap preserves the property of such a heap, i.e. at every node the NPL value of the left child is greater than or equal to the NPL value of the right child.
-
+    bool testNPLValue();
+    bool testLEFTISTProperty();
 
     //Test whether after changing the priority function a correct heap is rebuilt with the same data (nodes) and the different priority function.
 
@@ -169,8 +159,10 @@ public:
 
 private:
     void insertMultipleStudents(RQueue &myQueue);
-
     bool checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType);
+    bool checkRemovalOrder(RQueue &myQueue);
+    bool checkNPLValue(Node *node);
+    bool checkLEFTISTProperty(Node *node);
 };
 
 void Tester::insertMultipleStudents(RQueue &myQueue) {
@@ -196,7 +188,7 @@ void Tester::insertMultipleStudents(RQueue &myQueue) {
 
 bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType) {
     if (node != nullptr) {
-        //recurse until both left and right sub-heaps satisfy heap property
+        //recursively check whether both left and right sub-heaps satisfy heap property
         if (!checkHeapProperty(node->m_left, priorFunc, heapType) ||
             !checkHeapProperty(node->m_right, priorFunc, heapType)) {
             return false;
@@ -210,7 +202,7 @@ bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType)
             //if there is a left child, get its priority
             leftChildPriority = priorFunc(node->m_left->m_student);
         } else {
-            //otherwise, assign a default priority
+            //otherwise, assign the default priority according to heaptype
             if (heapType == MINHEAP) {
                 leftChildPriority = MAX;
             } else {
@@ -222,7 +214,7 @@ bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType)
             //if there is a right child, get its priority
             rightChildPriority = priorFunc(node->m_right->m_student);
         } else {
-            //otherwise, assign a default priority
+            //otherwise, assign the default priority according to heaptype
             if (heapType == MINHEAP) {
                 rightChildPriority = MAX;
             } else {
@@ -235,10 +227,107 @@ bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType)
             (heapType == MAXHEAP && currPriority >= leftChildPriority && currPriority >= rightChildPriority)) {
             return true;
         }
-        //if comparison fails
+        //test fails if any comparisons are false
         return false;
     }
-    //if heap is empty
+    //test passes if heap is empty
+    return true;
+}
+
+bool Tester::checkRemovalOrder(RQueue &myQueue) {
+    //remove root and save its priority
+    Student prevStudent = myQueue.getNextStudent();
+    int prevPriority = myQueue.m_priorFunc(prevStudent);
+
+    int removeSize = 98;
+
+    for (int i = 0; i < removeSize; i++) {
+        //remove the next node and save its priority
+        Student currStudent = myQueue.getNextStudent();
+        int currPriority = myQueue.m_priorFunc(currStudent);
+
+        //compare the priorities of the previous and current removed nodes
+        if ((myQueue.m_heapType == MINHEAP && currPriority < prevPriority) ||
+            (myQueue.m_heapType == MAXHEAP && currPriority > prevPriority)) {
+            //test fails if a lower priority node is removed before a higher priority
+            return false;
+        }
+
+        //advance the "previous" node to be the current node, and repeat the process
+        prevStudent = currStudent;
+        prevPriority = currPriority;
+    }
+
+    //test passes if all the nodes were removed in the correct order
+    return true;
+}
+
+bool Tester::checkNPLValue(Node *node) {
+    if (node != nullptr) {
+        //recursively check whether both left and right sub-heaps have correct NPL values
+        if (!checkNPLValue(node->m_left) ||
+            !checkNPLValue(node->m_right)) {
+            return false;
+        }
+
+        int leftChildNPL = 0;
+        int rightChildNPL = 0;
+
+        //get NPL values of left and right children
+        if (node->m_left != nullptr) {
+            leftChildNPL = node->m_left->m_npl;
+        } else {
+            leftChildNPL = -1;
+        }
+        if (node->m_right != nullptr) {
+            rightChildNPL = node->m_right->m_npl;
+        } else {
+            rightChildNPL = -1;
+        }
+
+        //calculate expected NPL value for each node
+        int correctNPL = min(leftChildNPL, rightChildNPL) + 1;
+
+        if (node->m_npl != correctNPL) {
+            //test fails if any NPL values differ from expected values
+            return false;
+        }
+        //test passes if all NPL values match
+        return true;
+    }
+    //test passes if heap is empty
+    return true;
+}
+
+bool Tester::checkLEFTISTProperty(Node *node) {
+    if (node != nullptr) {
+        //recursively check whether both left and right sub-heaps satisfy leftist property
+        if (!checkLEFTISTProperty(node->m_left) ||
+            !checkLEFTISTProperty(node->m_right)) {
+            return false;
+        }
+
+        int leftChildNPL = 0;
+        int rightChildNPL = 0;
+
+        //get NPL values of left and right children
+        if (node->m_left != nullptr) {
+            leftChildNPL = node->m_left->m_npl;
+        } else {
+            leftChildNPL = -1;
+        }
+        if (node->m_right != nullptr) {
+            rightChildNPL = node->m_right->m_npl;
+        } else {
+            rightChildNPL = -1;
+        }
+
+        if (leftChildNPL >= rightChildNPL) {
+            return true;
+        }
+        return false;
+    }
+    //test passes if heap is empty
     return true;
 }
 
@@ -249,11 +338,78 @@ bool Tester::testHeapPropertyAfterInsertMINHEAP() {
     return checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP);
 }
 
+bool Tester::testHeapPropertyAfterInsertMAXHEAP() {
+    RQueue myQueue(priorityFn2, MAXHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    return checkHeapProperty(myQueue.m_heap, priorityFn2, MAXHEAP);
+}
+
+bool Tester::testRemovalOrderMINHEAP() {
+    RQueue myQueue(priorityFn2, MINHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    return checkRemovalOrder(myQueue);
+}
+
+bool Tester::testRemovalOrderMAXHEAP() {
+    RQueue myQueue(priorityFn2, MAXHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    return checkRemovalOrder(myQueue);
+}
+
+bool Tester::testNPLValue() {
+    RQueue myQueue(priorityFn2, MAXHEAP, LEFTIST);
+    insertMultipleStudents(myQueue);
+
+    return checkNPLValue(myQueue.m_heap);
+}
+
+bool Tester::testLEFTISTProperty() {
+    RQueue myQueue(priorityFn2, MAXHEAP, LEFTIST);
+    insertMultipleStudents(myQueue);
+
+    return checkLEFTISTProperty(myQueue.m_heap);
+}
+
 int main() {
     Tester tester;
 
     cout << "\nTesting insertStudent - check whether heap property is satisfied after insertion into min-heap:" << endl;
     if (tester.testHeapPropertyAfterInsertMINHEAP()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+    cout << "Testing insertStudent - check whether heap property is satisfied after insertion into max-heap:" << endl;
+    if (tester.testHeapPropertyAfterInsertMAXHEAP()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting getNextStudent - check whether all min-heap removals happen in the correct order:" << endl;
+    if (tester.testRemovalOrderMINHEAP()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+    cout << "Testing getNextStudent - check whether all max-heap removals happen in the correct order:" << endl;
+    if (tester.testRemovalOrderMAXHEAP()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting leftist heap - check whether all nodes in a leftist heap have the correct NPL value:" << endl;
+    if (tester.testNPLValue()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+    cout << "Testing leftist heap - check whether leftist heap preserves the property of such a heap:" << endl;
+    if (tester.testLEFTISTProperty()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
