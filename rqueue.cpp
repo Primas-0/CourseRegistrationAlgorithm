@@ -48,7 +48,7 @@ void RQueue::copyNodes(Node *sourceNode, Node *&destinationNode) {
         destinationNode = nullptr;
     } else {
         //allocate memory and copy over the data from each node
-        destinationNode = new Node(sourceNode->m_student);
+        destinationNode = new Node(*sourceNode);
 
         //preorder traversal of heap
         copyNodes(sourceNode->m_left, destinationNode->m_left);
@@ -97,6 +97,9 @@ void RQueue::mergeWithQueue(RQueue &rhs) {
     } else {
         throw domain_error("Cannot merge queues with different priority functions or different data structures");
     }
+
+    //update heap size after merge
+    m_size += rhs.m_size;
 
     //leave rhs empty
     rhs.m_heap = nullptr;
