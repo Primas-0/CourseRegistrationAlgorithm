@@ -134,28 +134,28 @@ public:
     bool testLEFTISTProperty();
 
     //Test whether after changing the priority function a correct heap is rebuilt with the same data (nodes) and the different priority function.
-
+    bool testSetPriorityFn();
 
     //Test merge of an empty queue (an edge case) with a normal queue. This is a call to the function RQueue::mergeWithQueue(RQueue& rhs) where rhs is a normally populated queue.
-
+    bool testMergeWithQueueEdge();
 
     //Test the RQueue class copy constructor for a normal case.
-
+    bool testCopyConstructorNormal();
 
     //Test the RQueue class copy constructor for an edge case.
-
+    bool testCopyConstructorEdge();
 
     //Test the RQueue class assignment operator for a normal case.
-
+    bool testAssignmentNormal();
 
     //Test the RQueue class assignment operator for an edge case.
-
+    bool testAssignmentEdge();
 
     //Test that attempting to dequeue an empty queue throws an out_of_range exception.
-
+    bool testRemovalError();
 
     //Test that attempting to merge queues with different priority functions throws a domain_error exception.
-
+    bool testMergeWithQueueError();
 
 private:
     void insertMultipleStudents(RQueue &myQueue);
@@ -163,6 +163,7 @@ private:
     bool checkRemovalOrder(RQueue &myQueue);
     bool checkNPLValue(Node *node);
     bool checkLEFTISTProperty(Node *node);
+    void storeDataInVector(vector<Node*> &dataVector, Node *node);
 };
 
 void Tester::insertMultipleStudents(RQueue &myQueue) {
@@ -331,6 +332,17 @@ bool Tester::checkLEFTISTProperty(Node *node) {
     return true;
 }
 
+void Tester::storeDataInVector(vector<Node*> &dataVector, Node *node) {
+    if (node != nullptr) {
+        //insert each node pointer into a vector
+        dataVector.push_back(node);
+        storeDataInVector(dataVector, node->m_left);
+        storeDataInVector(dataVector, node->m_right);
+    }
+    //order the node pointers in non-descending order of memory address
+    sort(dataVector.begin(), dataVector.end());
+}
+
 bool Tester::testHeapPropertyAfterInsertMINHEAP() {
     RQueue myQueue(priorityFn2, MINHEAP, SKEW);
     insertMultipleStudents(myQueue);
@@ -339,38 +351,61 @@ bool Tester::testHeapPropertyAfterInsertMINHEAP() {
 }
 
 bool Tester::testHeapPropertyAfterInsertMAXHEAP() {
-    RQueue myQueue(priorityFn2, MAXHEAP, SKEW);
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
     insertMultipleStudents(myQueue);
 
-    return checkHeapProperty(myQueue.m_heap, priorityFn2, MAXHEAP);
+    return checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP);
 }
 
 bool Tester::testRemovalOrderMINHEAP() {
     RQueue myQueue(priorityFn2, MINHEAP, SKEW);
     insertMultipleStudents(myQueue);
 
-    return checkRemovalOrder(myQueue);
+    return checkRemovalOrder(myQueue) && checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP);
 }
 
 bool Tester::testRemovalOrderMAXHEAP() {
-    RQueue myQueue(priorityFn2, MAXHEAP, SKEW);
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
     insertMultipleStudents(myQueue);
 
-    return checkRemovalOrder(myQueue);
+    return checkRemovalOrder(myQueue) && checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP);
 }
 
 bool Tester::testNPLValue() {
-    RQueue myQueue(priorityFn2, MAXHEAP, LEFTIST);
+    RQueue myQueue(priorityFn1, MAXHEAP, LEFTIST);
     insertMultipleStudents(myQueue);
 
-    return checkNPLValue(myQueue.m_heap);
+    return checkNPLValue(myQueue.m_heap) && checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP);
 }
 
 bool Tester::testLEFTISTProperty() {
-    RQueue myQueue(priorityFn2, MAXHEAP, LEFTIST);
+    RQueue myQueue(priorityFn1, MAXHEAP, LEFTIST);
     insertMultipleStudents(myQueue);
 
-    return checkLEFTISTProperty(myQueue.m_heap);
+    return checkLEFTISTProperty(myQueue.m_heap) && checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP);
+}
+
+bool Tester::testSetPriorityFn() {
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    vector<Node*> initialData;
+    vector<Node*> finalData;
+
+    //save data before change in one vector
+    storeDataInVector(initialData, myQueue.m_heap);
+
+    //change priority function and heap type
+    myQueue.setPriorityFn(priorityFn2, MINHEAP);
+
+    //save data after change in a different vector
+    storeDataInVector(finalData, myQueue.m_heap);
+
+    //verify whether the data is the same, the priority function has been changed, and heap property is maintained
+    if (initialData != finalData || myQueue.m_priorFunc != priorityFn2 || !checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP)) {
+        return false;
+    }
+    return true;
 }
 
 int main() {
@@ -410,6 +445,13 @@ int main() {
     }
     cout << "Testing leftist heap - check whether leftist heap preserves the property of such a heap:" << endl;
     if (tester.testLEFTISTProperty()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting setPriorityFn - check whether after changing the priority function a correct heap is rebuilt with the same data and the different priority function:" << endl;
+    if (tester.testSetPriorityFn()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
