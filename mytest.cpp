@@ -183,10 +183,8 @@ void Tester::insertMultipleStudents(RQueue &myQueue) {
 bool Tester::checkHeapProperty(Node *node, prifn_t priorFunc, HEAPTYPE heapType) {
     if (node != nullptr) {
         //recursively check whether both left and right sub-heaps satisfy heap property
-        if (!checkHeapProperty(node->m_left, priorFunc, heapType) ||
-            !checkHeapProperty(node->m_right, priorFunc, heapType)) {
-            return false;
-        }
+        checkHeapProperty(node->m_left, priorFunc, heapType);
+        checkHeapProperty(node->m_right, priorFunc, heapType);
 
         int currPriority = priorFunc(node->m_student);
         int leftChildPriority = 0;
@@ -259,9 +257,8 @@ bool Tester::checkRemovalOrder(RQueue &myQueue) {
 bool Tester::checkNPLValue(Node *node) {
     if (node != nullptr) {
         //recursively check whether both left and right sub-heaps have correct NPL values
-        if (!checkNPLValue(node->m_left) || !checkNPLValue(node->m_right)) {
-            return false;
-        }
+        checkNPLValue(node->m_left);
+        checkNPLValue(node->m_right);
 
         int leftChildNPL = 0;
         int rightChildNPL = 0;
@@ -295,9 +292,8 @@ bool Tester::checkNPLValue(Node *node) {
 bool Tester::checkLEFTISTProperty(Node *node) {
     if (node != nullptr) {
         //recursively check whether both left and right sub-heaps satisfy leftist property
-        if (!checkLEFTISTProperty(node->m_left) || !checkLEFTISTProperty(node->m_right)) {
-            return false;
-        }
+        checkLEFTISTProperty(node->m_left);
+        checkLEFTISTProperty(node->m_right);
 
         int leftChildNPL = 0;
         int rightChildNPL = 0;
@@ -337,10 +333,8 @@ void Tester::storeDataInVector(vector<Node *> &dataVector, Node *node) {
 bool Tester::checkHeapEquivalence(Node *source, Node *destination) {
     if (source != nullptr && destination != nullptr) {
         //recursively check whether both left and right sub-heaps are equivalent
-        if (!checkHeapEquivalence(source->m_left, destination->m_left) ||
-            !checkHeapEquivalence(source->m_right, destination->m_right)) {
-            return false;
-        }
+        checkHeapEquivalence(source->m_left, destination->m_left);
+        checkHeapEquivalence(source->m_right, destination->m_right);
 
         if (source->m_student == destination->m_student) {
             return true;
@@ -459,6 +453,43 @@ bool Tester::testCopyConstructorEdge() {
     if (!checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap) || myQueue.m_size != copyQueue.m_size ||
         myQueue.m_priorFunc != copyQueue.m_priorFunc || myQueue.m_heapType != copyQueue.m_heapType ||
         myQueue.m_structure != copyQueue.m_structure) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testAssignmentNormal() {
+    RQueue sourceQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(sourceQueue);
+
+    RQueue destQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(destQueue);
+
+    //assign one normal queue to another
+    destQueue = sourceQueue;
+
+    //heaps and member variables should be identical
+    if (!checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap) ||
+        sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
+        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testAssignmentEdge() {
+    RQueue sourceQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(sourceQueue);
+
+    RQueue destQueue(priorityFn1, MAXHEAP, SKEW);
+
+    //assign a normal queue to an empty queue
+    destQueue = sourceQueue;
+
+    //heaps and member variables should be identical
+    if (!checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap) ||
+        sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
+        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure) {
         return false;
     }
     return true;
