@@ -143,10 +143,8 @@ public:
     bool testAssignmentNormal();
     bool testAssignmentEdge();
 
-    //Test that attempting to dequeue an empty queue throws an out_of_range exception.
     bool testRemovalError();
 
-    //Test that attempting to merge queues with different priority functions throws a domain_error exception.
     bool testMergeWithQueueError();
 
 private:
@@ -322,9 +320,9 @@ bool Tester::checkLEFTISTProperty(Node *node) {
 void Tester::storeDataInVector(vector<Node *> &dataVector, Node *node) {
     if (node != nullptr) {
         //insert each node pointer into a vector
-        dataVector.push_back(node);
         storeDataInVector(dataVector, node->m_left);
         storeDataInVector(dataVector, node->m_right);
+        dataVector.push_back(node);
     }
     //order the node pointers in non-descending order of memory address
     sort(dataVector.begin(), dataVector.end());
@@ -421,7 +419,8 @@ bool Tester::testMergeWithQueueEdge() {
     emptyQueue.mergeWithQueue(normalQueue);
 
     //size of empty queue should be updated, empty queue should no longer be empty, and normal queue should be empty
-    if (emptyQueue.m_size != normalQueueSize || emptyQueue.m_heap == nullptr || normalQueue.m_heap != nullptr) {
+    if (emptyQueue.m_size != normalQueueSize || emptyQueue.m_heap == nullptr || normalQueue.m_heap != nullptr ||
+        !checkHeapProperty(normalQueue.m_heap, priorityFn1, MAXHEAP)) {
         return false;
     }
     return true;
@@ -435,9 +434,10 @@ bool Tester::testCopyConstructorNormal() {
     RQueue copyQueue(myQueue);
 
     //heaps and member variables should be identical
-    if (!checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap) || myQueue.m_size != copyQueue.m_size ||
-        myQueue.m_priorFunc != copyQueue.m_priorFunc || myQueue.m_heapType != copyQueue.m_heapType ||
-        myQueue.m_structure != copyQueue.m_structure) {
+    if (myQueue.m_size != copyQueue.m_size || myQueue.m_priorFunc != copyQueue.m_priorFunc ||
+        myQueue.m_heapType != copyQueue.m_heapType || myQueue.m_structure != copyQueue.m_structure ||
+        !checkHeapProperty(copyQueue.m_heap, priorityFn1, MAXHEAP) ||
+        !checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap)) {
         return false;
     }
     return true;
@@ -450,9 +450,10 @@ bool Tester::testCopyConstructorEdge() {
     RQueue copyQueue(myQueue);
 
     //heaps and member variables should be identical
-    if (!checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap) || myQueue.m_size != copyQueue.m_size ||
-        myQueue.m_priorFunc != copyQueue.m_priorFunc || myQueue.m_heapType != copyQueue.m_heapType ||
-        myQueue.m_structure != copyQueue.m_structure) {
+    if (myQueue.m_size != copyQueue.m_size || myQueue.m_priorFunc != copyQueue.m_priorFunc ||
+        myQueue.m_heapType != copyQueue.m_heapType || myQueue.m_structure != copyQueue.m_structure ||
+        !checkHeapProperty(copyQueue.m_heap, priorityFn1, MAXHEAP) ||
+        !checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap)) {
         return false;
     }
     return true;
@@ -469,9 +470,10 @@ bool Tester::testAssignmentNormal() {
     destQueue = sourceQueue;
 
     //heaps and member variables should be identical
-    if (!checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap) ||
-        sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
-        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure) {
+    if (sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
+        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure ||
+        !checkHeapProperty(destQueue.m_heap, priorityFn1, MAXHEAP) ||
+        !checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap)) {
         return false;
     }
     return true;
@@ -479,58 +481,89 @@ bool Tester::testAssignmentNormal() {
 
 bool Tester::testAssignmentEdge() {
     RQueue sourceQueue(priorityFn1, MAXHEAP, SKEW);
-    insertMultipleStudents(sourceQueue);
 
     RQueue destQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(sourceQueue);
 
-    //assign a normal queue to an empty queue
+    //assign an empty queue to a normal queue (copy the empty queue)
     destQueue = sourceQueue;
 
     //heaps and member variables should be identical
-    if (!checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap) ||
-        sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
-        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure) {
+    if (sourceQueue.m_size != destQueue.m_size || sourceQueue.m_priorFunc != destQueue.m_priorFunc ||
+        sourceQueue.m_heapType != destQueue.m_heapType || sourceQueue.m_structure != destQueue.m_structure ||
+        !checkHeapProperty(destQueue.m_heap, priorityFn1, MAXHEAP) ||
+        !checkHeapEquivalence(sourceQueue.m_heap, destQueue.m_heap)) {
         return false;
     }
     return true;
 }
 
+bool Tester::testRemovalError() {
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
+
+    try {
+        //try removing from an empty queue
+        myQueue.getNextStudent();
+    } catch (out_of_range &e) {
+        //test passes if appropriate error is thrown
+        return true;
+    }
+    return false;
+}
+
+bool Tester::testMergeWithQueueError() {
+    RQueue queue1(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(queue1);
+
+    RQueue queue2(priorityFn2, MINHEAP, SKEW);
+    insertMultipleStudents(queue2);
+
+    try {
+        //try merging queues with different priority functions
+        queue1.mergeWithQueue(queue2);
+    } catch (domain_error &e) {
+        //test passes if appropriate error is thrown
+        return true;
+    }
+    return false;
+}
+
 int main() {
     Tester tester;
 
-    cout << "\nTesting insertStudent - check whether heap property is satisfied after insertion into min-heap:" << endl;
+    cout << "\nTesting insertStudent (MINHEAP) - check whether heap property is satisfied after insertion:" << endl;
     if (tester.testHeapPropertyAfterInsertMINHEAP()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
-    cout << "Testing insertStudent - check whether heap property is satisfied after insertion into max-heap:" << endl;
+    cout << "Testing insertStudent (MAXHEAP) - check whether heap property is satisfied after insertion:" << endl;
     if (tester.testHeapPropertyAfterInsertMAXHEAP()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting getNextStudent - check whether all min-heap removals happen in the correct order:" << endl;
+    cout << "\nTesting getNextStudent (MINHEAP) - check whether all removals happen in the correct order:" << endl;
     if (tester.testRemovalOrderMINHEAP()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
-    cout << "Testing getNextStudent - check whether all max-heap removals happen in the correct order:" << endl;
+    cout << "Testing getNextStudent (MAXHEAP) - check whether all removals happen in the correct order:" << endl;
     if (tester.testRemovalOrderMAXHEAP()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting leftist heap - check whether all nodes in a leftist heap have the correct NPL value:" << endl;
+    cout << "\nTesting LEFTIST heap - check whether all nodes in a leftist heap have the correct NPL value:" << endl;
     if (tester.testNPLValue()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
-    cout << "Testing leftist heap - check whether leftist heap preserves the property of such a heap:" << endl;
+    cout << "Testing LEFTIST heap - check whether leftist heap preserves the property of such a heap:" << endl;
     if (tester.testLEFTISTProperty()) {
         cout << "\tTest passed!" << endl;
     } else {
@@ -545,34 +578,49 @@ int main() {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting mergeWithQueue - successfully merges an empty queue with a normal queue:" << endl;
+    cout << "\nTesting mergeWithQueue (edge) - successfully merges an empty queue with a normal queue:" << endl;
     if (tester.testMergeWithQueueEdge()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting copy constructor - normal:" << endl;
+    cout << "\nTesting copy constructor (normal) - successfully creates deep copy of normal queue:" << endl;
     if (tester.testCopyConstructorNormal()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
-    cout << "Testing copy constructor - edge:" << endl;
+    cout << "Testing copy constructor (edge) - successfully creates deep copy of empty queue:" << endl;
     if (tester.testCopyConstructorEdge()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting assignment operator - normal:" << endl;
+    cout << "\nTesting assignment operator (normal) - successfully creates deep copy of normal queue:" << endl;
     if (tester.testAssignmentNormal()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
     }
-    cout << "Testing assignment operator - edge:" << endl;
+    cout << "Testing assignment operator (edge) - successfully creates deep copy of empty queue:" << endl;
     if (tester.testAssignmentEdge()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting getNextStudent (error) - attempting to dequeue an empty queue throws an out_of_range exception:" << endl;
+    if (tester.testRemovalError()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting mergeWithQueue (error) - attempting to merge queues with different priority functions throws a "
+            "domain_error exception:" << endl;
+    if (tester.testMergeWithQueueError()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
@@ -604,4 +652,3 @@ int priorityFn2(const Student &student) {
     int priority = student.getRace() + student.getGender() + student.getIncome() + student.getHighschool();
     return priority;
 }
-
