@@ -133,22 +133,14 @@ public:
     bool testNPLValue();
     bool testLEFTISTProperty();
 
-    //Test whether after changing the priority function a correct heap is rebuilt with the same data (nodes) and the different priority function.
     bool testSetPriorityFn();
 
-    //Test merge of an empty queue (an edge case) with a normal queue. This is a call to the function RQueue::mergeWithQueue(RQueue& rhs) where rhs is a normally populated queue.
     bool testMergeWithQueueEdge();
 
-    //Test the RQueue class copy constructor for a normal case.
     bool testCopyConstructorNormal();
-
-    //Test the RQueue class copy constructor for an edge case.
     bool testCopyConstructorEdge();
 
-    //Test the RQueue class assignment operator for a normal case.
     bool testAssignmentNormal();
-
-    //Test the RQueue class assignment operator for an edge case.
     bool testAssignmentEdge();
 
     //Test that attempting to dequeue an empty queue throws an out_of_range exception.
@@ -163,7 +155,8 @@ private:
     bool checkRemovalOrder(RQueue &myQueue);
     bool checkNPLValue(Node *node);
     bool checkLEFTISTProperty(Node *node);
-    void storeDataInVector(vector<Node*> &dataVector, Node *node);
+    void storeDataInVector(vector<Node *> &dataVector, Node *node);
+    bool checkHeapEquivalence(Node *source, Node *destination);
 };
 
 void Tester::insertMultipleStudents(RQueue &myQueue) {
@@ -266,8 +259,7 @@ bool Tester::checkRemovalOrder(RQueue &myQueue) {
 bool Tester::checkNPLValue(Node *node) {
     if (node != nullptr) {
         //recursively check whether both left and right sub-heaps have correct NPL values
-        if (!checkNPLValue(node->m_left) ||
-            !checkNPLValue(node->m_right)) {
+        if (!checkNPLValue(node->m_left) || !checkNPLValue(node->m_right)) {
             return false;
         }
 
@@ -303,8 +295,7 @@ bool Tester::checkNPLValue(Node *node) {
 bool Tester::checkLEFTISTProperty(Node *node) {
     if (node != nullptr) {
         //recursively check whether both left and right sub-heaps satisfy leftist property
-        if (!checkLEFTISTProperty(node->m_left) ||
-            !checkLEFTISTProperty(node->m_right)) {
+        if (!checkLEFTISTProperty(node->m_left) || !checkLEFTISTProperty(node->m_right)) {
             return false;
         }
 
@@ -332,7 +323,7 @@ bool Tester::checkLEFTISTProperty(Node *node) {
     return true;
 }
 
-void Tester::storeDataInVector(vector<Node*> &dataVector, Node *node) {
+void Tester::storeDataInVector(vector<Node *> &dataVector, Node *node) {
     if (node != nullptr) {
         //insert each node pointer into a vector
         dataVector.push_back(node);
@@ -341,6 +332,22 @@ void Tester::storeDataInVector(vector<Node*> &dataVector, Node *node) {
     }
     //order the node pointers in non-descending order of memory address
     sort(dataVector.begin(), dataVector.end());
+}
+
+bool Tester::checkHeapEquivalence(Node *source, Node *destination) {
+    if (source != nullptr && destination != nullptr) {
+        //recursively check whether both left and right sub-heaps are equivalent
+        if (!checkHeapEquivalence(source->m_left, destination->m_left) ||
+            !checkHeapEquivalence(source->m_right, destination->m_right)) {
+            return false;
+        }
+
+        if (source->m_student == destination->m_student) {
+            return true;
+        }
+        return false;
+    }
+    return true;
 }
 
 bool Tester::testHeapPropertyAfterInsertMINHEAP() {
@@ -389,8 +396,8 @@ bool Tester::testSetPriorityFn() {
     RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
     insertMultipleStudents(myQueue);
 
-    vector<Node*> initialData;
-    vector<Node*> finalData;
+    vector<Node *> initialData;
+    vector<Node *> finalData;
 
     //save data before change in one vector
     storeDataInVector(initialData, myQueue.m_heap);
@@ -402,7 +409,56 @@ bool Tester::testSetPriorityFn() {
     storeDataInVector(finalData, myQueue.m_heap);
 
     //verify whether the data is the same, the priority function has been changed, and heap property is maintained
-    if (initialData != finalData || myQueue.m_priorFunc != priorityFn2 || !checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP)) {
+    if (initialData != finalData || myQueue.m_priorFunc != priorityFn2 ||
+        !checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP)) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testMergeWithQueueEdge() {
+    RQueue emptyQueue(priorityFn1, MAXHEAP, SKEW);
+
+    RQueue normalQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(normalQueue);
+
+    int normalQueueSize = normalQueue.m_size;
+
+    emptyQueue.mergeWithQueue(normalQueue);
+
+    //size of empty queue should be updated, empty queue should no longer be empty, and normal queue should be empty
+    if (emptyQueue.m_size != normalQueueSize || emptyQueue.m_heap == nullptr || normalQueue.m_heap != nullptr) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testCopyConstructorNormal() {
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    //copy a normal queue
+    RQueue copyQueue(myQueue);
+
+    //heaps and member variables should be identical
+    if (!checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap) || myQueue.m_size != copyQueue.m_size ||
+        myQueue.m_priorFunc != copyQueue.m_priorFunc || myQueue.m_heapType != copyQueue.m_heapType ||
+        myQueue.m_structure != copyQueue.m_structure) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testCopyConstructorEdge() {
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
+
+    //copy an empty queue
+    RQueue copyQueue(myQueue);
+
+    //heaps and member variables should be identical
+    if (!checkHeapEquivalence(myQueue.m_heap, copyQueue.m_heap) || myQueue.m_size != copyQueue.m_size ||
+        myQueue.m_priorFunc != copyQueue.m_priorFunc || myQueue.m_heapType != copyQueue.m_heapType ||
+        myQueue.m_structure != copyQueue.m_structure) {
         return false;
     }
     return true;
@@ -450,8 +506,42 @@ int main() {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting setPriorityFn - check whether after changing the priority function a correct heap is rebuilt with the same data and the different priority function:" << endl;
+    cout << "\nTesting setPriorityFn - check whether after changing the priority function a correct heap is rebuilt "
+            "with the same data and the different priority function:" << endl;
     if (tester.testSetPriorityFn()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting mergeWithQueue - successfully merges an empty queue with a normal queue:" << endl;
+    if (tester.testMergeWithQueueEdge()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting copy constructor - normal:" << endl;
+    if (tester.testCopyConstructorNormal()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+    cout << "Testing copy constructor - edge:" << endl;
+    if (tester.testCopyConstructorEdge()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+
+    cout << "\nTesting assignment operator - normal:" << endl;
+    if (tester.testAssignmentNormal()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
+    cout << "Testing assignment operator - edge:" << endl;
+    if (tester.testAssignmentEdge()) {
         cout << "\tTest passed!" << endl;
     } else {
         cout << "\t***Test failed!***" << endl;
