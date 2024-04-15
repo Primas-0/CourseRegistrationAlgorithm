@@ -134,6 +134,7 @@ public:
     bool testLEFTISTProperty();
 
     bool testSetPriorityFn();
+    bool testSetStructure();
 
     bool testMergeWithQueueEdge();
 
@@ -334,9 +335,11 @@ bool Tester::checkHeapEquivalence(Node *source, Node *destination) {
         checkHeapEquivalence(source->m_left, destination->m_left);
         checkHeapEquivalence(source->m_right, destination->m_right);
 
+        //compare each student using the overloaded equality operator provided in rqueue.h
         if (source->m_student == destination->m_student) {
             return true;
         }
+        //test fails if any of the students differ
         return false;
     }
     return true;
@@ -403,6 +406,30 @@ bool Tester::testSetPriorityFn() {
     //verify whether the data is the same, the priority function has been changed, and heap property is maintained
     if (initialData != finalData || myQueue.m_priorFunc != priorityFn2 ||
         !checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP)) {
+        return false;
+    }
+    return true;
+}
+
+bool Tester::testSetStructure() {
+    RQueue myQueue(priorityFn1, MAXHEAP, SKEW);
+    insertMultipleStudents(myQueue);
+
+    vector<Node *> initialData;
+    vector<Node *> finalData;
+
+    //save data before change in one vector
+    storeDataInVector(initialData, myQueue.m_heap);
+
+    //change priority function and heap type
+    myQueue.setStructure(LEFTIST);
+
+    //save data after change in a different vector
+    storeDataInVector(finalData, myQueue.m_heap);
+
+    //verify whether the data is the same, the priority function has been changed, and heap property is maintained
+    if (initialData != finalData || myQueue.m_priorFunc != priorityFn1 ||
+        !checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP)) {
         return false;
     }
     return true;
@@ -577,6 +604,13 @@ int main() {
     } else {
         cout << "\t***Test failed!***" << endl;
     }
+    cout << "Testing setStructure - check whether after changing the structure a correct heap is rebuilt with the same "
+            "data and the different structure:" << endl;
+    if (tester.testSetStructure()) {
+        cout << "\tTest passed!" << endl;
+    } else {
+        cout << "\t***Test failed!***" << endl;
+    }
 
     cout << "\nTesting mergeWithQueue (edge) - successfully merges an empty queue with a normal queue:" << endl;
     if (tester.testMergeWithQueueEdge()) {
@@ -611,7 +645,8 @@ int main() {
         cout << "\t***Test failed!***" << endl;
     }
 
-    cout << "\nTesting getNextStudent (error) - attempting to dequeue an empty queue throws an out_of_range exception:" << endl;
+    cout << "\nTesting getNextStudent (error) - attempting to dequeue an empty queue throws an out_of_range exception:"
+         << endl;
     if (tester.testRemovalError()) {
         cout << "\tTest passed!" << endl;
     } else {
