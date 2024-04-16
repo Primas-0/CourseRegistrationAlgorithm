@@ -330,10 +330,10 @@ void Tester::storeDataInVector(vector<Node *> &dataVector, Node *node) {
 
 bool Tester::checkVectorsContainSameData(vector<Node *> vector1, vector<Node *> vector2) {
     //traverse through both vectors
-    for (int i = 0; i < vector1.size(); i++) {
+    for (unsigned int i = 0; i < vector1.size(); i++) {
         //set the flag to false by default
         bool flag = false;
-        for (int j = 0; j < vector2.size(); j++) {
+        for (unsigned int j = 0; j < vector2.size(); j++) {
             //if a node in the first vector is found in the second, change the flag to true
             if (vector1[i] == vector2[j]) {
                 flag = true;
