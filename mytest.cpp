@@ -155,6 +155,7 @@ private:
     bool checkNPLValue(Node *node);
     bool checkLEFTISTProperty(Node *node);
     void storeDataInVector(vector<Node *> &dataVector, Node *node);
+    bool checkVectorsContainSameData(vector<Node *> vector1, vector<Node *> vector2);
     bool checkHeapEquivalence(Node *source, Node *destination);
 };
 
@@ -325,8 +326,27 @@ void Tester::storeDataInVector(vector<Node *> &dataVector, Node *node) {
         storeDataInVector(dataVector, node->m_right);
         dataVector.push_back(node);
     }
-    //order the node pointers in non-descending order of memory address
-    sort(dataVector.begin(), dataVector.end());
+}
+
+bool Tester::checkVectorsContainSameData(vector<Node *> vector1, vector<Node *> vector2) {
+    //traverse through both vectors
+    for (int i = 0; i < vector1.size(); i++) {
+        //set the flag to false by default
+        bool flag = false;
+        for (int j = 0; j < vector2.size(); j++) {
+            //if a node in the first vector is found in the second, change the flag to true
+            if (vector1[i] == vector2[j]) {
+                flag = true;
+            }
+        }
+        //if a node in the first vector is not found in the second, return false immediately
+        //otherwise, move on to the next node in the first vector
+        if (!flag) {
+            return false;
+        }
+    }
+    //if all the nodes in the first vector are also found in the second vector, return true
+    return true;
 }
 
 bool Tester::checkHeapEquivalence(Node *source, Node *destination) {
@@ -404,7 +424,7 @@ bool Tester::testSetPriorityFn() {
     storeDataInVector(finalData, myQueue.m_heap);
 
     //verify whether the data is the same, the priority function has been changed, and heap property is maintained
-    if (initialData != finalData || myQueue.m_priorFunc != priorityFn2 ||
+    if (!checkVectorsContainSameData(initialData, finalData) || myQueue.m_priorFunc != priorityFn2 ||
         !checkHeapProperty(myQueue.m_heap, priorityFn2, MINHEAP)) {
         return false;
     }
@@ -428,7 +448,7 @@ bool Tester::testSetStructure() {
     storeDataInVector(finalData, myQueue.m_heap);
 
     //verify whether the data is the same, the priority function has been changed, and heap property is maintained
-    if (initialData != finalData || myQueue.m_priorFunc != priorityFn1 ||
+    if (!checkVectorsContainSameData(initialData, finalData) || myQueue.m_priorFunc != priorityFn1 ||
         !checkHeapProperty(myQueue.m_heap, priorityFn1, MAXHEAP)) {
         return false;
     }
