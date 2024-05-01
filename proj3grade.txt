@@ -1,0 +1,119 @@
+CMSC341 Project 3 Gradesheet 
+---------------------------------------------------------------------------
+Student ID: mnarend1
+
+Max grade: 100 
+Raw grade: 100
+Late penalty: 0
+Total grade: 100
+
+(Total grade = Raw grade - Late penalty)
+
+
+Issues, comments, notes and deductions marked by an 'X' are the ones
+that apply to your project submission.
+
+
+General comments: Excellent job with your project and getting all test cases as well as using good coding standards!
+
+
+
+---------------------------------------------------------------------------
+
+Scripted notes and deductions:
+
+
+Checking files
+
+ X == -0: rqueue.cpp found
+ X == -0: mytest.cpp found
+
+Compile and Run Unit Tests
+
+ X == -0: No errors in unit test InsertMinSkewHeap
+ X == -0: No errors in unit test InsertMaxSkewHeap
+ X == -0: No errors in unit test InsertMaxLeftistHeap
+ X == -0: No errors in unit test GetNextMinHeap
+ X == -0: No errors in unit test GetNextMaxHeap
+ X == -0: No errors in unit test MergeWithQueue
+ X == -0: No errors in unit test EmptyMergeWithQueue
+ X == -0: No errors in unit test EmptyMergeWithEmpty
+ X == -0: No errors in unit test SelfMergeWithQueue
+ X == -0: No errors in unit test SetPriorityFn
+ X == -0: No errors in unit test setStructure
+ X == -0: No errors in unit test getNextException
+ X == -0: No errors in unit test mergeException
+ X == -0: No errors in unit test CopyConstructor
+ X == -0: No errors in unit test CopyConstructorEdge
+ X == -0: No errors in unit test AssignmentOp
+ X == -0: No errors in unit test AssignmentOpEdge
+
+Compile and Run mytest.cpp
+
+ X == -0: Student test program (mytest.cpp) ran to completion.
+ X == -0: Student test program (mytest.cpp) ran without memory leaks.
+ X == -0: Student test program (mytest.cpp) ran without memory errors.
+
+---------------------------------------------------------------------------
+
+I. Effort Grading
+
+   Program does not compile or does not run, or runs but does not
+   produce output even after minor tweaks. Grading based on effort.
+   Deductions from scripted grading and deductions marked below are
+   ignored. Late penalties still apply.
+
+   Choose one only:
+
+   ~~  60:  Removing one or two major bugs will fix this project.
+   ~~  45:  Significant progress made, but major rewrite is necessary.
+   ~~  30:  Not much progress made. 
+   ~~  15:  Barely started coding. 
+   ~~   0:  Morally equivalent to no submission.
+   
+           Comment:
+
+
+---------------------------------------------------------------------------
+
+II. Tests in mytest.cpp
+
+   == -2: Test insertion for a normal case of min-heap (either skew or leftist or both). Heap property is satisfied
+   == -2: Test insertion for a normal case of max-heap. Heap property is satisfied
+   == -2: Test removal for a normal case of min-heap (either skew or leftist or both). Removals happen in the correct order
+   == -1: Test removal for a normal case of max-heap. Removals happen in the correct order
+   == -1: test leftist NPL values are correct after multiple insertions.
+   == -1: Test leftist NPL values are correct after multiple removal.
+   == -1: Test setPriorityFn() rebuilds the heap correctly
+   == -1: Test merge of an empty queue (edge case) with a normal queue
+   == -1: Test mergeWithQueue() merges the two heaps correctly
+   == -1: Test copy contstructor (Deep copy)
+   == -1: Test Assignment operator (Deep copy)
+   == -1: Test getNextStudent() throws out_of_range exception
+   == -1: Test mergeWithQueue() throws domain_error exception
+   
+
+
+          Comment:
+
+
+---------------------------------------------------------------------------
+
+IV. Coding Standards
+
+ X == -0:  Good indentation, comments, and choice of variable names
+
+   == -2:  Poor or inconsistent indentation
+
+   == -2:  Program uses global variables or static data members in lieu of 
+           parameters and return values
+
+   == -2:  In-line comments are terse and not meaningful
+   == -3:  In-line comments are non-existent
+
+   == -1:  Poor choice of variable names
+   
+           Comment:
+
+
+---------------------------------------------------------------------------
